@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <title>Photo Upload</title>
+    <style>
+        body {
+    background-color: yellow;
+    font-family: 'Helvetica', sans-serif;
+    font-weight: bold; /* Make all text bold */
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    text-align: center;
+    font-style: italic; /* Make the title italic */
+}
+
+h3 {
+    text-align: center;
+    font-style: italic; /* Make the title italic */
+}
+
+.form-container {
+    background-color: black;
+    padding: 20px;
+    border-radius: 10px;
+    color: yellow;
+    margin: auto;
+    margin-bottom: 20px; /* Separate the boxes */
+    width: 80%;
+}
+
+.form-title {
+    color: orange; 
+    font-size: 20px; 
+    margin-bottom: 10px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers children horizontally in the flex container */
+    width: 100%; /* Takes the full width of the form-container */
+}
+
+.form-group label {
+    width: 100%; /* Allows the label to take the full width */
+    text-align: center; /* Centers the text within the label */
+    margin-bottom: 10px; /* Provides some space between the label and the input below it */
+}
+
+label {
+    align-self: flex-start;
+    margin-bottom: 0.5em;
+}
+
+input[type="file"] {
+    font-size: 16px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+input[type="text"], textarea {
+    width: 70%;
+    font-size: 16px;
+    padding: 12px 20px;
+    margin: 10px auto;
+    display: block;
+}
+
+/* Uniform styles for both submit and button types */
+input[type="submit"], input[type="button"] {
+    background-color: yellow; /* Yellow background */
+    color: black; /* Black text */
+    padding: 15px 30px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    margin: 10px auto; /* Center the button */
+    font-weight: bold;
+}
+
+input[type="submit"]:hover, input[type="button"]:hover {
+    background-color: #e5e500; /* Lighter yellow for hover */
+}
+
+@media only screen and (max-width: 600px) {
+    .form-container {
+        width: 90%;
+    }
+
+    input[type="file"], input[type="text"], input[type="button"], input[type="submit"], textarea {
+        width: 90%;
+        font-size: 18px;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    textarea {
+        height: 200px; /* Adjust this value as needed */
+    }
+}
+
+
+    </style>
+    
+
+</head>
+<body>
+    <h1>ALIEN AI</h1>
+    <h3>collectiveSyntheticBodyMonsters</h3>
+
+    <!-- Inside your existing form with id 'uploadForm' -->
+<div class="form-container">
+    <h2 class="form-title">UPLOAD BODY PART IMAGES</h2>
+    <form id="uploadForm" enctype="multipart/form-data" method="POST" action="upload.php">
+        <div class="form-group">
+            <label for="photo">Select image to upload:</label>
+            <input type="file" name="photo" id="photo">
+            <span id="fileNameDisplay"></span> <!-- New element to display file name -->
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Upload Photo" onclick="uploadFile(event); clearFileInput();">
+        </div>
+        <div id="photoUploadMessage"></div>
+    </form>
+</div>
+
+    
+    <div class="form-container">
+        <h2 class="form-title">UPLOAD BODY PART DESCRIPTIONS</h2> <!-- Form Title -->
+        <form id="textUploadForm">
+            <div class="form-group">
+                <label for="userText">Enter text to upload:</label>
+                <textarea name="userText" id="userText"></textarea> <!-- Changed to textarea -->
+            </div>
+            <div class="form-group">
+                <input type="button" value="Upload Text" onclick="uploadText()">
+            </div>
+            <!-- Response message container for the text upload form -->
+            <div id="textUploadMessage"></div>
+        </form>
+    </div>
+    
+    
+
+    <div id="message"></div>
+
+<script>
+
+document.getElementById('photo').addEventListener('change', function() {
+    // This function will be called when a file is selected
+    var fileNameDisplay = document.getElementById('fileNameDisplay');
+    if (this.files.length > 0) {
+        fileNameDisplay.textContent = this.files[0].name; // Display file name
+    } else {
+        fileNameDisplay.textContent = ''; // Clear file name display
+    }
+});
+
+function clearFileInput() {
+    var fileInput = document.getElementById('photo');
+    fileInput.value = ''; // Clear the file input
+    document.getElementById('fileNameDisplay').textContent = ''; // Clear file name display
+}
+
+function uploadFile(event) {
+    event.preventDefault(); // Prevent the default form submission
+    var formData = new FormData(document.getElementById('uploadForm'));
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'upload.php', true); // Make sure the URL is correct
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // Target the photo upload message container
+            document.getElementById('photoUploadMessage').innerHTML = xhr.responseText;
+        } else {
+            // Target the photo upload message container
+            document.getElementById('photoUploadMessage').innerHTML = 'Error occurred during file upload: ' + xhr.status;
+            if (xhr.statusText) {
+                document.getElementById('photoUploadMessage').innerHTML += '<br>' + xhr.statusText;
+            }
+        }
+    };
+    xhr.send(formData);
+}
+
+function uploadText() {
+    var textData = new FormData(document.getElementById('textUploadForm'));
+    var xhr = new XMLHttpRequest();
+    document.getElementById('textUploadMessage').innerHTML = 'Uploading...'; // Target the text upload message container
+    xhr.open('POST', 'text_upload.php', true);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // Target the text upload message container
+            document.getElementById('textUploadMessage').innerHTML = 'Thank you for your text upload';
+            document.getElementById('userText').value = ''; // Clear the text box after upload
+        } else {
+            // Target the text upload message container
+            document.getElementById('textUploadMessage').innerHTML = 'Error occurred during text upload: ' + xhr.status;
+        }
+    };
+    xhr.send(textData);
+}
+
+</script>
+
+<div class="footer-link">
+    <a href="http://www.uliap.com">www.uliap.com</a>
+</div>
+
+</body>
+</html>
